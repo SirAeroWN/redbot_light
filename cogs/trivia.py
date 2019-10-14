@@ -9,6 +9,7 @@ import time
 import os
 import asyncio
 import chardet
+import requests as req
 
 DEFAULTS = {"MAX_SCORE"    : 10,
             "TIMEOUT"      : 120,
@@ -88,6 +89,25 @@ class Trivia:
             self.settings[server.id]["REVEAL_ANSWER"] = True
             await self.bot.say("I'll reveal the answer if no one knows it.")
         self.save_settings()
+
+    @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
+    async def triviaload(self, ctx, list_name: str):
+        message = ctx.message
+        server = message.server
+        lists = os.listdir("data/trivia/")
+        lists = [l for l in lists if l.endswith(".txt") and " " not in l]
+        lists = [l.replace(".txt", "") for l in lists]
+
+        if (list_name in lists):
+            # download list from bitbucket
+            r = req.get('https://api.bitbucket.org/2.0/repositories/norrv/trivia_lists/src')
+            v = r.json().get('values', [])
+            urls = list(filter(lambda f: f.get('path', '') == $'{list_name}.txt', v))
+            if len(urls) > 0:
+                url = urls[0].get('links', {}).get('self', {}).get('href', '')
+                if url != '':
+                    # call out to curl
+                    os.system($'curl -s -L {url} > data/trivia/{list_name}.txt')
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     async def trivia(self, ctx, list_name: str):
