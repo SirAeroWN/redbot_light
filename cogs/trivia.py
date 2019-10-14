@@ -116,13 +116,13 @@ class Trivia:
                     # call out to curl
                     print(url);
                     os.system('curl -s -L {url} > data/trivia/{list_name}.txt'.format(url=url, list_name=list_name))
-                    await bot.say('trivia file loaded (probably)')
+                    await self.bot.say('trivia file loaded (probably)')
                 else:
-                    await bot.say('error getting file url')
+                    await self.bot.say('error getting file url')
             else:
-                await bot.say('could not find file on bitbucket'
+                await self.bot.say('could not find file on bitbucket')
         else:
-            await bot.say('no trivia list with name {}'.format(list_name))
+            await self.bot.say('no trivia list with name {}'.format(list_name))
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     async def trivia(self, ctx, list_name: str):
