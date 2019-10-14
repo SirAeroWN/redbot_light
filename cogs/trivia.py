@@ -102,8 +102,14 @@ class Trivia:
         if (list_name in lists):
             # download list from bitbucket
             r = req.get('https://api.bitbucket.org/2.0/repositories/norrv/trivia_lists/src')
-            v = r.json().get('values', [])
-            urls = list(filter(lambda f: f.get('path', '') == '{list_name}.txt'.format(list_name=list_name), v))
+            j = r.json()
+            print(j)
+            urls = list(filter(lambda f: f.get('path', '') == '{list_name}.txt'.format(list_name=list_name), j.get('values', [])))
+            while j.get('next', False) and len(urls) == 0:
+                r = req.get(j['next'])
+                j = r.json()
+                print(j)
+                urls = list(filter(lambda f: f.get('path', '') == '{list_name}.txt'.format(list_name=list_name), j.get('values', [])))
             if len(urls) > 0:
                 url = urls[0].get('links', {}).get('self', {}).get('href', '')
                 if url != '':
