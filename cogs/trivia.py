@@ -92,6 +92,7 @@ class Trivia:
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     async def triviaload(self, ctx, list_name: str):
+        """loads trivia file from bitbucket"""
         message = ctx.message
         server = message.server
         lists = os.listdir("data/trivia/")
@@ -102,12 +103,20 @@ class Trivia:
             # download list from bitbucket
             r = req.get('https://api.bitbucket.org/2.0/repositories/norrv/trivia_lists/src')
             v = r.json().get('values', [])
-            urls = list(filter(lambda f: f.get('path', '') == $'{list_name}.txt', v))
+            urls = list(filter(lambda f: f.get('path', '') == '{list_name}.txt'.format(list_name=list_name), v))
             if len(urls) > 0:
                 url = urls[0].get('links', {}).get('self', {}).get('href', '')
                 if url != '':
                     # call out to curl
-                    os.system($'curl -s -L {url} > data/trivia/{list_name}.txt')
+                    print(url);
+                    os.system('curl -s -L {url} > data/trivia/{list_name}.txt'.format(url=url, list_name=list_name))
+                    await bot.say('trivia file loaded (probably)')
+                else:
+                    await bot.say('error getting file url')
+            else:
+                await bot.say('could not find file on bitbucket'
+        else:
+            await bot.say('no trivia list with name {}'.format(list_name))
 
     @commands.group(pass_context=True, invoke_without_command=True, no_pm=True)
     async def trivia(self, ctx, list_name: str):
